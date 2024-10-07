@@ -4,7 +4,6 @@ import typing as t
 import numpy as np
 import gymnasium as gym
 
-
 Action = int
 State = int
 Info = t.TypedDict("Info", {"prob": float, "action_mask": np.ndarray})
@@ -13,11 +12,11 @@ QValues = t.DefaultDict[int, t.DefaultDict[Action, float]]
 
 class QLearningAgent:
     def __init__(
-        self,
-        learning_rate: float,
-        epsilon: float,
-        gamma: float,
-        legal_actions: t.List[Action],
+            self,
+            learning_rate: float,
+            epsilon: float,
+            gamma: float,
+            legal_actions: t.List[Action],
     ):
         """
         Q-Learning Agent
@@ -49,11 +48,13 @@ class QLearningAgent:
         """
         value = 0.0
         # BEGIN SOLUTION
+        possible_actions = [self.get_qvalue(state, action=action) for action in self.legal_actions]
+        value = np.amax(possible_actions)
         # END SOLUTION
         return value
 
     def update(
-        self, state: State, action: Action, reward: t.SupportsFloat, next_state: State
+            self, state: State, action: Action, reward: t.SupportsFloat, next_state: State
     ):
         """
         You should do your Q-Value update here (s'=next_state):
@@ -63,6 +64,9 @@ class QLearningAgent:
         """
         q_value = 0.0
         # BEGIN SOLUTION
+        td_target = reward + self.gamma * self.get_value(next_state)
+        td_error = td_target - self.get_qvalue(state, action)
+        q_value = self.get_qvalue(state, action) + self.learning_rate * td_error
         # END SOLUTION
 
         self.set_qvalue(state, action, q_value)
@@ -82,15 +86,20 @@ class QLearningAgent:
         """
         Compute the action to take in the current state, including exploration.
 
-        Exploration is done with epsilon-greey. Namely, with probability self.epsilon, we should take a random action, and otherwise the best policy action (self.get_best_action).
+        Exploration is done with epsilon-greedy. Namely, with probability self.epsilon, we should take a random action,
+        and otherwise the best policy action (self.get_best_action).
 
         Note: To pick randomly from a list, use random.choice(list).
-              To pick True or False with a given probablity, generate uniform number in [0, 1]
+              To pick True or False with a given probability, generate uniform number in [0, 1]
               and compare it with your probability
         """
         action = self.legal_actions[0]
 
         # BEGIN SOLUTION
+        if np.random.uniform(0, 1) > self.epsilon:
+            action = self.get_best_action(state)
+        else:
+            action = random.choice(self.legal_actions)
         # END SOLUTION
 
         return action
