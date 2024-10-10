@@ -34,7 +34,8 @@ class QLearningAgentEpsScheduling(QLearningAgent):
         """
         Compute the action to take in the current state, including exploration.
 
-        Exploration is done with epsilon-greey. Namely, with probability self.epsilon, we should take a random action, and otherwise the best policy action (self.get_best_action).
+        Exploration is done with epsilon-greey. Namely, with probability self.epsilon, we should take a random action,
+        and otherwise the best policy action (self.get_best_action).
 
         Note: To pick randomly from a list, use random.choice(list).
               To pick True or False with a given probablity, generate uniform number in [0, 1]
@@ -43,6 +44,10 @@ class QLearningAgentEpsScheduling(QLearningAgent):
         action = self.legal_actions[0]
 
         # BEGIN SOLUTION
+        action = super().get_action(state)
+
+        decay = (self.epsilon_start - self.epsilon_end) / self.epsilon_decay_steps
+        self.epsilon -= decay
         # END SOLUTION
 
         return action

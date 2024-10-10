@@ -49,7 +49,7 @@ class QLearningAgent:
         value = 0.0
         # BEGIN SOLUTION
         possible_actions = [self.get_qvalue(state, action=action) for action in self.legal_actions]
-        value = np.amax(possible_actions)
+        value = np.max(possible_actions)
         # END SOLUTION
         return value
 
@@ -96,10 +96,11 @@ class QLearningAgent:
         action = self.legal_actions[0]
 
         # BEGIN SOLUTION
-        if np.random.uniform(0, 1) > self.epsilon:
+        if self.epsilon < np.random.uniform(0, 1):
             action = self.get_best_action(state)
         else:
             action = random.choice(self.legal_actions)
         # END SOLUTION
 
         return action
+

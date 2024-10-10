@@ -24,11 +24,11 @@ import numpy as np
 from qlearning import QLearningAgent
 from qlearning_eps_scheduling import QLearningAgentEpsScheduling
 from sarsa import SarsaAgent
-
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 env = gym.make("Taxi-v3", render_mode="rgb_array")
 n_actions = env.action_space.n  # type: ignore
-
 
 #################################################
 # 1. Play with QLearningAgent
@@ -57,7 +57,12 @@ def play_and_train(env: gym.Env, agent: QLearningAgent, t_max=int(1e4)) -> float
 
         # Train agent for state s
         # BEGIN SOLUTION
+        agent.update(s, a, r, next_s)
+        total_reward += r
 
+        s = next_s
+        if done:
+            break
         # END SOLUTION
 
     return total_reward
@@ -70,7 +75,43 @@ for i in range(1000):
         print("mean reward", np.mean(rewards[-100:]))
 
 assert np.mean(rewards[-100:]) > 0.0
+
 # TODO: créer des vidéos de l'agent en action
+
+def play_and_animate(env: gym.Env, agent: QLearningAgent, t_max=200):
+    frames = []
+
+    total_reward: t.SupportsFloat = 0.0
+    s, _ = env.reset()
+    for _ in range(t_max):
+        a = agent.get_best_action(s)
+        next_s, r, done, _, _ = env.step(a)
+        agent.update(s, a, r, next_s)
+        total_reward += r
+
+        frames.append(env.render())
+
+        s = next_s
+        if done:
+            break
+
+    return frames
+
+
+def create_animation(frames: t.List[np.ndarray], title: str):
+    fig, ax = plt.subplots()
+    plt.axis('off')
+
+    frames = [[plt.imshow(frame)] for frame in frames]
+
+    animation_fig = animation.ArtistAnimation(fig, frames, interval=500, blit=True, repeat_delay=1000)
+    plt.show()
+
+    animation_fig.save(f"videos/{title}.gif")
+
+
+create_animation(play_and_animate(env, agent), "qlearning2")
+
 
 #################################################
 # 2. Play with QLearningAgentEpsScheduling

@@ -47,6 +47,8 @@ class SarsaAgent:
         """
         value = 0.0
         # BEGIN SOLUTION
+        possible_actions = [self.get_qvalue(state, action=action) for action in self.legal_actions]
+        value = np.amax(possible_actions)
         # END SOLUTION
         return value
 
@@ -55,12 +57,15 @@ class SarsaAgent:
     ):
         """
         You should do your Q-Value update here (s'=next_state):
-           TD_target(s') = R(s, a) + gamma * V(s')
+           TD_target(s') = R(s, a) + gamma * Q(s', a')
            TD_error(s', a) = TD_target(s') - Q(s, a)
            Q_new(s, a) := Q(s, a) + alpha * TD_error(s', a)
         """
         q_value = 0.0
         # BEGIN SOLUTION
+        td_target = reward + self.gamma * self.get_qvalue(next_state, self.get_best_action(next_state))
+        td_error = td_target - self.get_qvalue(state, action)
+        q_value = self.get_qvalue(state, action) + self.learning_rate * td_error
         # END SOLUTION
 
         self.set_qvalue(state, action, q_value)
