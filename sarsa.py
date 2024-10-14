@@ -88,6 +88,7 @@ class SarsaAgent:
         action = self.legal_actions[0]
 
         # BEGIN SOLUTION
+        action = self.get_best_action(state)
         # END SOLUTION
 
         return action

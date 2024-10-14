@@ -36,17 +36,18 @@ n_actions = env.action_space.n  # type: ignore
 #################################################
 
 agent = QLearningAgent(
-    learning_rate=0.5, epsilon=0.25, gamma=0.99, legal_actions=list(range(n_actions))
+    learning_rate=0.3, epsilon=0.1, gamma=0.99, legal_actions=list(range(n_actions))
 )
 
 
-def play_and_train(env: gym.Env, agent: QLearningAgent, t_max=int(1e4)) -> float:
+def play_and_train(env: gym.Env, agent: QLearningAgent, t_max=int(1e4), render=False):
     """
     This function should
     - run a full game, actions given by agent.getAction(s)
     - train agent using agent.update(...) whenever possible
     - return total rewardb
     """
+    frames = []
     total_reward: t.SupportsFloat = 0.0
     s, _ = env.reset()
 
@@ -61,42 +62,15 @@ def play_and_train(env: gym.Env, agent: QLearningAgent, t_max=int(1e4)) -> float
         agent.update(s, a, r, next_s)
         total_reward += r
 
+        if render:
+            frames.append(env.render())
+
         s = next_s
         if done:
             break
         # END SOLUTION
 
-    return total_reward
-
-
-rewards = []
-for i in range(1000):
-    rewards.append(play_and_train(env, agent))
-    if i % 100 == 0:
-        print("mean reward", np.mean(rewards[-100:]))
-
-# assert np.mean(rewards[-100:]) > 0.0
-
-# TODO: créer des vidéos de l'agent en action
-
-def play_and_animate(env: gym.Env, agent: QLearningAgent, t_max=200):
-    frames = []
-
-    total_reward: t.SupportsFloat = 0.0
-    s, _ = env.reset()
-    for _ in range(t_max):
-        a = agent.get_best_action(s)
-        next_s, r, done, _, _ = env.step(a)
-        agent.update(s, a, r, next_s)
-        total_reward += r
-
-        frames.append(env.render())
-
-        s = next_s
-        if done:
-            break
-
-    return frames
+    return total_reward, frames
 
 
 def create_animation(frames: t.List[np.ndarray], title: str):
@@ -111,8 +85,17 @@ def create_animation(frames: t.List[np.ndarray], title: str):
     animation_fig.save(f"videos/{title}_{time.time()}.gif")
 
 
-create_animation(play_and_animate(env, agent), "qlearning")
+rewards = []
+for i in range(1000):
+    reward, frames = play_and_train(env, agent, render=i % 100 == 0)
+    rewards.append(reward)
+    if i % 100 == 0:
+        print("mean reward", np.mean(rewards[-100:]))
+        create_animation(frames, f"qlearning-train{i}")
 
+assert np.mean(rewards[-100:]) > 0.0
+
+create_animation(play_and_train(env, agent, t_max=200, render=True)[1], "qlearning-final")
 
 #################################################
 # 2. Play with QLearningAgentEpsScheduling
@@ -125,14 +108,15 @@ agent = QLearningAgentEpsScheduling(
 
 rewards = []
 for i in range(1000):
-    rewards.append(play_and_train(env, agent))
+    reward, frames = play_and_train(env, agent, render=i % 100 == 0)
+    rewards.append(reward)
     if i % 100 == 0:
         print("mean reward", np.mean(rewards[-100:]))
+        create_animation(frames, f"qlearning-eps-train{i}")
 
-# assert np.mean(rewards[-100:]) > 0.0
+assert np.mean(rewards[-100:]) > 0.0
 
-create_animation(play_and_animate(env, agent), "qlearningsEpsScheduling")
-exit(0)
+create_animation(play_and_train(env, agent, t_max=200, render=True)[1], "qlearningsEpsScheduling")
 
 ####################
 # 3. Play with SARSA
@@ -143,6 +127,10 @@ agent = SarsaAgent(learning_rate=0.5, gamma=0.99, legal_actions=list(range(n_act
 
 rewards = []
 for i in range(1000):
-    rewards.append(play_and_train(env, agent))
+    reward, frames = play_and_train(env, agent, render=i % 100 == 0)
+    rewards.append(reward)
     if i % 100 == 0:
         print("mean reward", np.mean(rewards[-100:]))
+        create_animation(frames, f"sarsa-train{i}")
+
+create_animation(play_and_train(env, agent, t_max=200, render=True)[1], "sarsa")
