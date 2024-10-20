@@ -95,6 +95,13 @@ for i in range(1000):
 
 assert np.mean(rewards[-100:]) > 0.0
 
+x = np.linspace(0, 1000, 1000)
+plt.scatter(x, rewards)
+plt.title("Q-Learning rewards")
+plt.xlabel("episode")
+plt.ylabel("reward")
+plt.savefig("qlearning-rewards.png")
+
 create_animation(play_and_train(env, agent, t_max=200, render=True)[1], "qlearning-final")
 
 #################################################
@@ -116,6 +123,12 @@ for i in range(1000):
 
 assert np.mean(rewards[-100:]) > 0.0
 
+plt.scatter(x, rewards)
+plt.title("Q-Learning Eps Scheduling rewards")
+plt.xlabel("episode")
+plt.ylabel("reward")
+plt.savefig("qlearning-eps-rewards.png")
+
 create_animation(play_and_train(env, agent, t_max=200, render=True)[1], "qlearningsEpsScheduling")
 
 ####################
@@ -132,5 +145,12 @@ for i in range(1000):
     if i % 100 == 0:
         print("mean reward", np.mean(rewards[-100:]))
         create_animation(frames, f"sarsa-train{i}")
+
+
+plt.scatter(x, rewards)
+plt.title("Q-Learning rewards")
+plt.xlabel("episode")
+plt.ylabel("reward")
+plt.savefig("qlearning-rewards.png")
 
 create_animation(play_and_train(env, agent, t_max=200, render=True)[1], "sarsa")
